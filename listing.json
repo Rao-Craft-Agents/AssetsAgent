@@ -1,0 +1,9 @@
+{
+  "name": "Assets",
+  "tagline": "An app's brand in its asset catalog: the icon at every size and appearance, colours, vector logos, placeholders, symbols.",
+  "category": "graphics",
+  "keywords": ["app icon", "asset catalog", "xcassets", "logo", "colors", "symbols", "granite", "loom"],
+  "platforms": ["macOS 14"],
+  "license": "MIT",
+  "description": "An app's brand, drawn on the Mac into its asset catalog. Give the app's name and, as you like, a mark (one to three letters in a bundled font, a geometric glyph, or your own picture) and its colours; Assets draws the app icon for iOS (any, dark and tinted), macOS (all ten sizes on Apple's grid), watchOS and visionOS, the accent and palette colours (`paper: #FFF8F0/#1C1714`, with high contrast when asked), vector logos (badge, template mark, wordmark, lockup), a launch logo, placeholder avatars and empty-state illustrations, light and dark.\n\nCustom symbols come from SVG path data in a 0…100 box and draw with `Image(\"whisk\")` at every weight; data files become data sets. Every set is written with the `Contents.json` Xcode writes, compiled by actool before it lands, and swapped in whole, so running again replaces only what it makes.\n\nNo model is asked, and Apple's SF Pro and SF Symbols never appear in an icon or a logo. A call it cannot honour is refused with every reason, and nothing is written.\n\nOne of the Rao Craft Agents: independent packages that, tagged in prompts along the life of a project, build an app of Loom's quality."
+}
