@@ -64,6 +64,12 @@ struct AssetsPlan: Sendable {
                 palette.append(color)
             } catch { reasons.append("\(error)") }
         }
+        // PIN: THE BRAND'S COLOUR IS THE TINT. With no line named `accent`, the first palette line is the app's
+        // AccentColor exactly as given (it stays a set of its own too): a person who names one brand colour means it.
+        if accent == nil, let first = palette.first {
+            accent = first
+            notes.append("AccentColor is \(first.name), the first palette line; name a line `accent` to choose another")
+        }
         var symbols: [SymbolSpec] = []
         named = [:]
         for line in (input.symbols ?? []).filter({ !$0.trimmingCharacters(in: .whitespaces).isEmpty }) {

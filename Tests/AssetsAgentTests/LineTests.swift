@@ -164,3 +164,16 @@ final class MarkReadingTests: XCTestCase {
         XCTAssertEqual(kept.brand.tones.mark, SRGBColor(hex: "#FFFFFF"), "a colour that reads is kept")
     }
 }
+
+/// One brand colour named in the palette is the app's tint, exactly as given.
+final class AccentReadingTests: XCTestCase {
+    func testTheFirstPaletteLineIsTheAccentWhenNoneIsNamedAccent() throws {
+        let folder = try Fixture.folder().path
+        let plan = try AssetsPlan.make(.init(name: "Hearth", palette: ["ember: #E4572E/#FF7A50"], directory: folder))
+        XCTAssertEqual(plan.accent?.light, SRGBColor(hex: "#E4572E"))
+        XCTAssertEqual(plan.accent?.dark, SRGBColor(hex: "#FF7A50"))
+        XCTAssertTrue(plan.notes.contains { $0.contains("AccentColor is ember") }, "\(plan.notes)")
+        let named = try AssetsPlan.make(.init(name: "Hearth", palette: ["ember: #E4572E/#FF7A50", "accent: #3355FF/#6688FF"], directory: folder))
+        XCTAssertEqual(named.accent?.light, SRGBColor(hex: "#3355FF"), "a line named accent wins")
+    }
+}

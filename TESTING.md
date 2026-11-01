@@ -114,3 +114,63 @@ Brand Hearth with $assets: an app icon with a spark mark on an ember-to-deep-red
 - The model's first call said `mark: spark` (a shape's name where the kind of mark goes) and was refused with a decoding error; its second call (`mark: shape, shape: spark`) worked. The release after this run reads a shape's own name in `mark` as that shape.
 - The model passed `foreground: #E4572E`, the accent, which shows at 1.0:1 on the ember ground; the agent drew it as asked. The release after this run keeps a 3:1 floor for any mark colour, given or not (WCAG 1.4.11), and names the colour it set aside.
 - The judicator returned no verdict (unjudged): the call wrote images only.
+
+### 2. The same prompt, on the release that keeps a mark readable (8719713)
+
+*2026-11-01 · Qwen3-Coder-Next-REAP-48B-A3B-mlx-4bit · 561 s*
+
+**The prompt**, verbatim:
+
+```text
+Brand Hearth with $assets: an app icon with a spark mark on an ember-to-deep-red gradient (#FF7A50 to #B8361A), the accent colour ember (#E4572E light, #FF7A50 dark), logos and a wordmark, a launch logo, and a few placeholder avatars for people who have not set one.
+```
+
+**The call the model wrote** to `assets`:
+
+```json
+{
+  "background": [
+    "#FF7A50",
+    "#B8361A"
+  ],
+  "foreground": "#E4572E",
+  "mark": "spark",
+  "name": "Hearth",
+  "palette": [
+    "ember: #E4572E/#FF7A50"
+  ],
+  "platforms": [
+    "ios",
+    "macos"
+  ],
+  "sets": [
+    "icon",
+    "accent",
+    "colors",
+    "logos",
+    "launch",
+    "placeholders"
+  ]
+}
+```
+
+**What `assets` wrote** (41 files): `Shared/Assets.xcassets/AppIcon.appiconset/icon-mac-512@2x.png`, `Shared/Assets.xcassets/AppIcon.appiconset/Contents.json`, `Shared/Assets.xcassets/AppIcon.appiconset/icon-ios.png`, `Shared/Assets.xcassets/AppIcon.appiconset/icon-ios-dark.png`, `Shared/Assets.xcassets/AppIcon.appiconset/icon-ios-tinted.png`, `Shared/Assets.xcassets/AppIcon.appiconset/icon-mac-16.png`, `Shared/Assets.xcassets/AppIcon.appiconset/icon-mac-16@2x.png`, `Shared/Assets.xcassets/AppIcon.appiconset/icon-mac-32.png`, `Shared/Assets.xcassets/AppIcon.appiconset/icon-mac-32@2x.png`, `Shared/Assets.xcassets/AppIcon.appiconset/icon-mac-128.png`, `Shared/Assets.xcassets/AppIcon.appiconset/icon-mac-128@2x.png`, `Shared/Assets.xcassets/AppIcon.appiconset/icon-mac-256.png`, `Shared/Assets.xcassets/AppIcon.appiconset/icon-mac-256@2x.png`, `Shared/Assets.xcassets/AppIcon.appiconset/icon-mac-512.png`, `Shared/Assets.xcassets/AccentColor.colorset/Contents.json`, `Shared/Assets.xcassets/ember.colorset/Contents.json`, `Shared/Assets.xcassets/Logo.imageset/Contents.json`, `Shared/Assets.xcassets/Logo.imageset/Logo.pdf`, `Shared/Assets.xcassets/Logo.imageset/Logo-dark.pdf`, `Shared/Assets.xcassets/LogoMark.imageset/Contents.json`, `Shared/Assets.xcassets/LogoMark.imageset/LogoMark.pdf`, `Shared/Assets.xcassets/Wordmark.imageset/Contents.json`, `Shared/Assets.xcassets/Wordmark.imageset/Wordmark.pdf`, `Shared/Assets.xcassets/Wordmark.imageset/Wordmark-dark.pdf`, `Shared/Assets.xcassets/Lockup.imageset/Contents.json`, `Shared/Assets.xcassets/Lockup.imageset/Lockup.pdf`, `Shared/Assets.xcassets/Lockup.imageset/Lockup-dark.pdf`, `Shared/Assets.xcassets/LaunchLogo.imageset/Contents.json`, `Shared/Assets.xcassets/LaunchLogo.imageset/LaunchLogo.pdf`, `Shared/Assets.xcassets/LaunchLogo.imageset/LaunchLogo-dark.pdf` …
+
+**What the model changed itself**: `Shared/Assets.xcassets/AccentColor.colorset/Contents.json`
+
+**Craft's checks**: `xcodebuild -scheme Hearth-macOS -destination platform=macOS build` passed; `xcodebuild -scheme Hearth-macOS -destination platform=macOS test` passed; `xcodebuild -scheme Hearth-macOS -destination platform=macOS build` passed; `xcodebuild -scheme Hearth-macOS -destination platform=macOS test` passed
+
+**The judicator**: misaligned ×2, unjudged ×2
+
+**Verified by hand**:
+- `xcodebuild -scheme Hearth-macOS -destination platform=macOS build`: BUILD SUCCEEDED
+
+![Hearth's icons after one call: white sparks on the ember ground, and the coral spark on the dark one](Docs/Testing/2-3b-icons.png)
+*Hearth's icons after one call: white sparks on the ember ground, and the coral spark on the dark one*
+
+![The outcome card](Docs/Testing/2-3b-card.png)
+*The outcome card*
+
+**Notes**:
+- The model wrote the same two things as in run 1, `mark: spark` and `foreground: #E4572E`, and this time one call did it: the shape's name read as the shape, and the mark colour under 3:1 set aside for white.
+- Craft's judicator caught a real gap: the prompt asked for the accent ember #E4572E, and the agent derived #DF5D33 because the model named the palette line `ember`, not `accent`; the model then edited AccentColor by hand. The release after this run makes the first palette line the app's AccentColor exactly as given when no line is named accent, and says so.
