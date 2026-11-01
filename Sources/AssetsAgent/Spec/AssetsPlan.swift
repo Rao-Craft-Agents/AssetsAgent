@@ -126,7 +126,9 @@ struct AssetsPlan: Sendable {
         if let text = input.foreground {
             if let color = SRGBColor(hex: text) { foreground = color } else { reasons.append("foreground `\(text)` is not a hex colour like #FFFFFF") }
         }
-        let kind = input.mark ?? (input.image != nil ? .image : input.shape != nil ? .shape : .monogram)
+        var kind = input.mark ?? (input.image != nil ? .image : input.shape != nil ? .shape : .monogram)
+        var glyph: AssetsShape?
+        if let shape = kind.namedShape { glyph = shape; kind = .shape }
         var picture: Picture?
         var pictureRefusal: String?
         if kind == .image, let path = input.image?.trimmingCharacters(in: .whitespaces), !path.isEmpty {
@@ -143,6 +145,16 @@ struct AssetsPlan: Sendable {
                 background = BrandDefaults.gradient(for: name)
             }
         }
+        // PIN: A MARK THAT DOES NOT SHOW IS NOT A MARK. A given colour under 3:1 against the middle of its background
+        // (the floor for a graphic, WCAG 1.4.11) is set aside for white or ink, whichever reads, and the answer says so.
+        if let given = foreground {
+            let ground = BrandTones.middle(of: Array(background.prefix(3)))
+            let ratio = given.contrast(with: ground)
+            if ratio < 3 {
+                notes.append("the mark's colour \(input.foreground ?? "") shows at only \(String(format: "%.1f", ratio)):1 on its background, under the 3:1 a mark needs, so the mark is white or ink, whichever reads")
+                foreground = nil
+            }
+        }
         let tones = BrandTones.derive(background: Array(background.prefix(3)), foreground: foreground, accent: accent.map { ($0.light, $0.dark) })
 
         var mark = BrandMark.monogram("A")
@@ -155,7 +167,7 @@ struct AssetsPlan: Sendable {
             }
             mark = .monogram(letters)
         case .shape:
-            if let shape = input.shape { mark = .shape(shape) }
+            if let shape = glyph ?? input.shape { mark = .shape(shape) }
             else { reasons.append("mark is shape and `shape` names no glyph: one of \(AssetsShape.allCases.map(\.rawValue).joined(separator: ", "))") }
         case .image:
             if let picture { mark = .image(picture) }
@@ -163,6 +175,8 @@ struct AssetsPlan: Sendable {
             else {
                 reasons.append("mark is image and `image` names no file: give a PNG, JPEG, PDF or SVG in the project")
             }
+        case .ring, .knot, .wave, .spark, .stack, .leaf, .bubble, .grid:
+            break   // a shape's own name was read as `shape` above
         }
         let wordmark = (input.wordmark ?? "").trimmingCharacters(in: .whitespaces).isEmpty ? name : input.wordmark!.trimmingCharacters(in: .whitespaces)
         if sets.contains(.logos), fontFound {

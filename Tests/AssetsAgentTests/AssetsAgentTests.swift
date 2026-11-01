@@ -16,7 +16,7 @@ final class AssetsAgentTests: XCTestCase {
         XCTAssertEqual(assets.schema, .object([
             .init(name: "into", schema: .string, required: false),
             .init(name: "name", schema: .string, required: false),
-            .init(name: "mark", schema: .choice(["monogram", "shape", "image"]), required: false),
+            .init(name: "mark", schema: .choice(["monogram", "shape", "image", "ring", "knot", "wave", "spark", "stack", "leaf", "bubble", "grid"]), required: false),
             .init(name: "letters", schema: .string, required: false),
             .init(name: "shape", schema: .choice(["ring", "knot", "wave", "spark", "stack", "leaf", "bubble", "grid"]), required: false),
             .init(name: "image", schema: .string, required: false),

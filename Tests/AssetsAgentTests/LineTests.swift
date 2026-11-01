@@ -143,3 +143,24 @@ final class LineTests: XCTestCase {
         XCTAssertThrowsError(try Fixture.write(.init(sets: [.colors], directory: folder.path))) { XCTAssertTrue("\($0)".contains("`palette` gives no lines")) }
     }
 }
+
+/// What a local model writes when it names the glyph where the kind goes, and a mark colour that does not show.
+final class MarkReadingTests: XCTestCase {
+    func testAShapesNameWhereTheMarkGoesDrawsThatShape() throws {
+        let folder = try Fixture.folder().path
+        let plan = try AssetsPlan.make(.init(name: "Hearth", mark: .spark, directory: folder))
+        XCTAssertEqual(plan.brand.mark, .shape(.spark))
+    }
+
+    func testAMarkColourUnderThreeToOneIsSetAsideAndSaid() throws {
+        let folder = try Fixture.folder().path
+        let plan = try AssetsPlan.make(.init(name: "Hearth", mark: .shape, shape: .spark, background: ["#FF7A50", "#B8361A"],
+                                             foreground: "#E4572E", directory: folder))
+        XCTAssertNotEqual(plan.brand.tones.mark, SRGBColor(hex: "#E4572E"), "an ember mark on an ember ground does not show")
+        XCTAssertGreaterThanOrEqual(plan.brand.tones.mark.contrast(with: BrandTones.middle(of: plan.brand.tones.background)), 3)
+        XCTAssertTrue(plan.notes.contains { $0.contains("under the 3:1 a mark needs") }, "\(plan.notes)")
+        let kept = try AssetsPlan.make(.init(name: "Hearth", mark: .shape, shape: .spark, background: ["#FF7A50", "#B8361A"],
+                                             foreground: "#FFFFFF", directory: folder))
+        XCTAssertEqual(kept.brand.tones.mark, SRGBColor(hex: "#FFFFFF"), "a colour that reads is kept")
+    }
+}
