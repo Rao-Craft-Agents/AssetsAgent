@@ -1,0 +1,19 @@
+{
+  "name": "Assets",
+  "tagline": "An app's brand in its asset catalog: the icon at every size and appearance, colours, vector logos, placeholders, symbols.",
+  "category": "graphics",
+  "keywords": [
+    "app icon",
+    "asset catalog",
+    "xcassets",
+    "logo",
+    "colors",
+    "symbols",
+    "granite",
+    "loom"
+  ],
+  "platforms": [
+    "macOS 14"
+  ],
+  "license": "MIT"
+}
