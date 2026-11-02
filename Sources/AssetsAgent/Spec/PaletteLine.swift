@@ -15,8 +15,10 @@ enum PaletteLine {
         guard let head = LineHead.split(line), !head.rest.isEmpty else {
             throw LineRefusal("palette line `\(line)` is not `name: #light/#dark`")
         }
-        guard LineHead.isAssetName(head.name) else {
-            throw LineRefusal("palette line `\(line)`: `\(head.name)` is not a colour name (a letter, then letters, digits, `_`, `-` or `.`)")
+        // `colors/background` is a set in a namespace folder, as a kit reads it by `Color("colors/background")`.
+        let segments = head.name.split(separator: "/", omittingEmptySubsequences: false).map(String.init)
+        guard segments.count <= 3, segments.allSatisfy(LineHead.isAssetName) else {
+            throw LineRefusal("palette line `\(line)`: `\(head.name)` is not a colour name (a letter, then letters, digits, `_`, `-` or `.`; `group/name` for a set in a namespace)")
         }
         let words = head.rest.split(whereSeparator: { $0 == "/" || $0 == "|" || $0 == " " || $0 == "," }).map(String.init)
         var colors: [SRGBColor] = []

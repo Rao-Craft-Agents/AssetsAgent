@@ -24,7 +24,13 @@ final class LineTests: XCTestCase {
         XCTAssertEqual(try PaletteLine.parse("surface = #FFFFFF / #121212").dark, SRGBColor(hex: "#121212"))
         let four = try PaletteLine.parse("danger: #D93A2B/#FF6B5E/#A3180D/#FFA39A")
         XCTAssertEqual(four.darkHigh, SRGBColor(hex: "#FFA39A"))
+        // A set in a namespace folder, as a kit reads it (`Color("colors/background")`, Hearth 2026-11-01).
+        let spaced = try PaletteLine.parse("colors/background: #FFFFFF/#121212")
+        XCTAssertEqual(spaced.name, "colors/background")
+        XCTAssertEqual(spaced.dark, SRGBColor(hex: "#121212"))
+        XCTAssertEqual(ColorSets.palette(spaced, contrast: false).folder, "colors/background.colorset")
         let refused: [(String, String)] = [
+            ("colors//background: #FFFFFF", "not a colour name"),
             ("brand #A19A8E/#CFCAC1/#000", "gives 3 colours"),
             ("brand: blue", "not a hex colour"),
             ("1brand: #FFFFFF", "not a colour name"),
