@@ -24,6 +24,23 @@ final class RerunTests: XCTestCase {
         XCTAssertEqual(try Data(contentsOf: icon), iconBefore, "a set the call does not make is left alone")
     }
 
+    /// A later call that adds a kit's colours keeps the brand: no icon redrawn, no tint taken from a page colour
+    /// (Hearth, 2026-11-01: `colors/background` became AccentColor and the icon was drawn again near white).
+    func testALaterPaletteCallKeepsTheBrand() throws {
+        let folder = try Fixture.folder()
+        let catalog = folder.appendingPathComponent("Shared/Assets.xcassets")
+        _ = try Fixture.write(.init(name: "Simmer", palette: ["ember: #E4572E/#FF7A50"], directory: folder.path))
+        let icon = try Data(contentsOf: catalog.appendingPathComponent("AppIcon.appiconset/icon-ios.png"))
+        let accent = try Data(contentsOf: catalog.appendingPathComponent("AccentColor.colorset/Contents.json"))
+        let later = try Fixture.write(.init(name: "Simmer", palette: ["colors/background: #FFFDF9/#141110", "colors/foreground: #231C17/#F5EEE7"],
+                                            directory: folder.path))
+        XCTAssertTrue(later.paths.allSatisfy { $0.contains("/colors/") }, "\(later.paths)")
+        XCTAssertEqual(try Data(contentsOf: catalog.appendingPathComponent("AppIcon.appiconset/icon-ios.png")), icon)
+        XCTAssertEqual(try Data(contentsOf: catalog.appendingPathComponent("AccentColor.colorset/Contents.json")), accent)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: catalog.appendingPathComponent("colors/background.colorset/Contents.json").path))
+        XCTAssertTrue(later.notes.contains { $0.contains("were kept") }, "\(later.notes)")
+    }
+
     func testTheSameCallTwiceWritesTheSameFiles() throws {
         let folder = try Fixture.folder()
         let first = try Fixture.write(.init(name: "Simmer", sets: [.icon, .accent, .placeholders], directory: folder.path))

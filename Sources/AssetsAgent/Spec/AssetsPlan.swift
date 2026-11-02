@@ -66,7 +66,12 @@ struct AssetsPlan: Sendable {
         }
         // PIN: THE BRAND'S COLOUR IS THE TINT. With no line named `accent`, the first palette line is the app's
         // AccentColor exactly as given (it stays a set of its own too): a person who names one brand colour means it.
-        if accent == nil, let first = palette.first {
+        // Not over an accent the catalog already has, nor from a kit's namespaced colour (`colors/background`):
+        // a later call adding a kit's colours made the near-white page colour the tint (Hearth, 2026-11-01).
+        let manager = FileManager.default
+        let hasAccent = manager.fileExists(atPath: catalog.appendingPathComponent("AccentColor.colorset").path)
+        let madeBefore = manager.fileExists(atPath: catalog.appendingPathComponent("AppIcon.appiconset").path)
+        if accent == nil, !hasAccent, let first = palette.first(where: { !$0.name.contains("/") }) {
             accent = first
             notes.append("AccentColor is \(first.name), the first palette line; name a line `accent` to choose another")
         }
@@ -112,6 +117,12 @@ struct AssetsPlan: Sendable {
             if sets.contains(.data) && !given(input.data) { reasons.append("`sets` asks for data and `data` gives no lines: add `name: path/to/file`") }
             if !symbols.isEmpty && !sets.contains(.symbols) { notes.append("the symbols lines were left out: `sets` does not ask for symbols") }
             if !data.isEmpty && !sets.contains(.data) { notes.append("the data lines were left out: `sets` does not ask for data") }
+        } else if madeBefore, input.mark == nil, input.letters == nil, input.shape == nil, input.image == nil,
+                  input.background == nil, input.foreground == nil, input.font == nil {
+            // A catalog that has its icon, asked for more: only what the lines give, so a palette never redraws the brand.
+            sets = (accent == nil ? [] : [.accent]) + (palette.isEmpty ? [] : [.colors]) + (symbols.isEmpty ? [] : [.symbols]) + (data.isEmpty ? [] : [.data])
+            if sets.isEmpty { reasons.append("the catalog already has its icon and this call gives nothing new: add palette, symbols or data lines, or name the mark to draw it again") }
+            else { notes.append("the icon, logos, launch logo and placeholders were kept: name the mark, its letters, shape, image, background or font to draw them again") }
         } else {
             sets = [.icon, .accent] + (palette.isEmpty ? [] : [.colors]) + [.logos, .launch, .placeholders, .empty]
                 + (symbols.isEmpty ? [] : [.symbols]) + (data.isEmpty ? [] : [.data])
