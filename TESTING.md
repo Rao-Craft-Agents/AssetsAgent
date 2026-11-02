@@ -174,3 +174,38 @@ Brand Hearth with $assets: an app icon with a spark mark on an ember-to-deep-red
 **Notes**:
 - The model wrote the same two things as in run 1, `mark: spark` and `foreground: #E4572E`, and this time one call did it: the shape's name read as the shape, and the mark colour under 3:1 set aside for white.
 - Craft's judicator caught a real gap: the prompt asked for the accent ember #E4572E, and the agent derived #DF5D33 because the model named the palette line `ember`, not `accent`; the model then edited AccentColor by hand. The release after this run makes the first palette line the app's AccentColor exactly as given when no line is named accent, and says so.
+
+## Conformance on Hearth
+
+Level 1 of the regime: the call a model should write, sent straight to the installed runner over its wire
+(granite-agent/1) with no model, on a copy of Hearth as the journey left it (services, mock data and loom's views
+made), then checked by building, testing and screenshotting the app. A pass here means the agent can produce the
+result deterministically; whether Craft's model writes this call is tested by the prompts above.
+
+### A kit's colours added to Hearth's catalog
+
+*2026-11-01 · straight to the runner, no model*
+
+**The call**:
+
+```json
+{
+  "name": "Hearth",
+  "palette": [
+    "colors/background: #FFFDF9/#141110",
+    "colors/alternateBackground: #F8F2EC/#1B1714",
+    "colors/secondaryBackground: #F3ECE4/#211C18",
+    "colors/tertiaryBackground: #EBE2D8/#2A231E",
+    "colors/foreground: #231C17/#F5EEE7",
+    "colors/secondaryForeground: #6E6259/#ADA197"
+  ]
+}
+```
+
+**Checks**:
+- First run refused: `colors/background` was not a colour name. Fixed: `group/name` is a set in a namespace folder
+- Second run redrew the icon and made the page colour the tint, so the tab item went white. Fixed: a later call writes only what its lines give and keeps an existing AccentColor
+- Third run: only Shared/Assets.xcassets/colors/ written; icon and AccentColor kept
+
+![Loom's views on the colours assets wrote, the ember tab kept](Docs/Testing/l1-l1-feed-brand.png)
+*Loom's views on the colours assets wrote, the ember tab kept*
