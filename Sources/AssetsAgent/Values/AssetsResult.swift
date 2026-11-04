@@ -1,7 +1,8 @@
 import Foundation
+import GraniteAgents
 
 /// What a call answers: the files written, as absolute paths, and the sets they make.
-public struct AssetsResult: Codable, Sendable, Equatable {
+public struct AssetsResult: AgentAnswer, Equatable {
     /// The file to look at first: the largest app icon when the call drew one, else the first file written.
     public var path: String?
     /// Every file written: each set's images and its `Contents.json`.
